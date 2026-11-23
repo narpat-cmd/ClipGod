@@ -3,74 +3,64 @@ ClipGod Backend - Main Application
 A FastAPI backend for video transcription and clip generation
 """
 
-import os
-import sys
-from pathlib import Path
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
-
-from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks, Query
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
-import uvicorn
-import logging
-from typing import Optional, List
-import uuid
-import shutil
+from sqlalchemy.orm import Session
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+from app.core.config import settings
+from app.db.session import init_db, get_db
+from app.routers.api import router as api_router
+from app.models.database import TranscriptionJob, ClipJob, JobStatus
 
-# Create FastAPI app
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    init_db()
+    # Create upload directories
+    settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    settings.CLIPS_DIR.mkdir(parents=True, exist_ok=True)
+    yield
+    # Shutdown
+    pass
+
+
 app = FastAPI(
     title="ClipGod API",
-    description="Video transcription and clip generation API",
+    description="Automated video clipping with AI transcription",
     version="1.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    lifespan=lifespan,
 )
 
-# CORS Middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure properly for production
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Static files for clips
+app.mount("/clips", StaticFiles(directory=settings.CLIPS_DIR), name="clips")
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+
 # Include routers
-from app.routers import api_router
 app.include_router(api_router, prefix="/api")
 
-# Health check endpoint
-@app.get("/api/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy", "service": "ClipGod API"}
 
-# Root endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "clipgod"}
+
+
 @app.get("/")
 async def root():
-    """Root endpoint"""
-    return {"message": "Welcome to ClipGod API", "version": "1.0.0"}
-
-# Mount static files for uploads
-uploads_dir = Path("/app/uploads")
-uploads_dir.mkdir(parents=True, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
-
-if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
+    return {
+        "message": "ClipGod API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/health"
+    }
