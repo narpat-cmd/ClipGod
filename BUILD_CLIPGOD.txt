@@ -1,0 +1,39 @@
+PROJECT: ClipGod (Cloud-Deployable AI Video Clipping Website)
+PROJECT FOLDER: E:\ClipGod
+
+MISSION:
+Build a complete, production-ready, cloud-deployable AI Video Clipping Web Application named "ClipGod" directly inside E:\ClipGod using file_write and shell_exec. This website must be ready to deploy live on the internet (NOT just localhost). Do not stop at instructions—create all folders, code files, and deployment configs directly.
+
+1. FRONTEND (E:\ClipGod\frontend - Ready for Vercel / Netlify):
+- Modern Dark-Mode Glassmorphism UI (React + Vite + Tailwind CSS, or clean modern HTML/Tailwind/JS).
+- Configurable API_BASE_URL via environment variable (VITE_API_URL / config) so it connects seamlessly to the live cloud backend.
+- Core Features:
+  * Paste Video URL bar (YouTube, Instagram Reels, Shorts, TikTok, etc.) + "Find Best Clips" button with loading states.
+  * Built-in Viral Templates Selector:
+    1. Hormozi Style (Bold yellow/white animated pop captions)
+    2. Podcast Split-Screen (Auto-crop speaker + clean subtitles)
+    3. Gaming / RGB Reaction (Top gameplay/content + bottom facecam layout)
+    4. Minimal Cinematic (Clean centered subtitles + subtle blur background)
+  * Clip Timeline Editor (adjust start/end timestamps, edit caption text, switch 9:16 / 1:1 / 16:9 aspect ratio).
+  * Live video preview player + one-click MP4 Download button.
+- Include vercel.json for 1-click free deployment on Vercel.
+
+2. BACKEND (E:\ClipGod\backend - Ready for Render / Hugging Face Spaces):
+- Python FastAPI with CORS enabled for live frontend domains.
+- Uses yt-dlp to fetch video/audio from URLs and ffmpeg to cut vertical 9:16 (1080x1920) clips, burn captions, and apply the selected template.
+- Auto-extracts audio/subtitles and identifies top 3-5 viral moments (30-60s) with viral scores (1-100), titles, and timestamps.
+- REST API Endpoints:
+  * GET /api/health
+  * POST /api/analyze (takes video URL, returns top 3-5 clip suggestions)
+  * POST /api/render (renders clip with chosen template, aspect ratio, and captions)
+  * GET /api/download/{filename}
+- Include a production-ready Dockerfile (installing Python, ffmpeg, and yt-dlp), requirements.txt, and render.yaml for free cloud deployment.
+
+3. GIT & DEPLOYMENT GUIDE (E:\ClipGod):
+- Initialize a git repository in E:\ClipGod with a proper .gitignore.
+- Create DEPLOY_GUIDE.md with exact step-by-step commands to push to GitHub and deploy Frontend on Vercel + Backend on Render / Hugging Face Spaces for free.
+
+EXECUTION RULES:
+- Work step by step: create folder structure -> backend -> frontend -> Docker/Vercel configs -> DEPLOY_GUIDE.md.
+- Verify Python syntax and config files have no errors.
+- Report exact paths of all created files when finished.
